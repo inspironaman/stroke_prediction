@@ -1,0 +1,198 @@
+# Load dataset and importing all packages
+
+import pandas as pd
+from statistics import median,mode,mean
+from sklearn import preprocessing
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_validate
+from sklearn.metrics import accuracy_score
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import confusion_matrix
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn import svm
+from sklearn import tree
+from sklearn.model_selection import cross_val_predict
+from sklearn.model_selection import cross_val_score
+df=pd.read_csv('health_care.csv')
+def Average(lst):
+    return sum(lst) / len(lst)
+
+# Top five dataset instances
+
+lst=df.dtypes
+print(lst)
+
+# Dataset information
+
+df.info()
+
+df.describe() #missing values and spread of data
+
+# Replacing null values with Mean, Median, Mode
+
+w=[] #empty list
+w=df['bmi'] 
+cleanlist=[x for x in w if (pd.isnull(x) == False)]
+print(len(cleanlist))
+b = median(cleanlist)
+df['bmi'].fillna(b, inplace = True)
+
+# Removing null value rows
+
+df=df.dropna(axis=0)
+
+df.info()
+
+# Seprating dataframe
+
+df_2=pd.DataFrame()
+df_object=pd.DataFrame()
+    
+for i in range(len(df.columns)):
+        
+    if df.dtypes[i] == 'int64' or df.dtypes[i] == 'float64':
+        df_2[df.columns[i]]=df[df.columns[i]]
+
+    if df.dtypes[i] == 'object':
+        df_object[df.columns[i]]=df[df.columns[i]]
+
+df_2=df_2.drop('id',axis=1) #Dropping the id column
+
+df_object.info()
+
+# Label Encoder for categorical columns
+
+label_encoder = preprocessing.LabelEncoder()
+for j in df_object.columns:
+    df_object[j]= label_encoder.fit_transform(df_object[j])
+
+for w in df_object.columns:
+    df_2[w]=df_object[w]
+
+df_2.info()
+
+# Algorithm
+
+X = df_2.drop(columns = 'stroke',axis =1)
+y = df_2['stroke']
+
+# X_train, X_test, y_train, y_test = train_test_split(X,y, test_size=0.3,random_state=9)
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2,random_state=9,shuffle ='True')
+
+# Random forest
+
+random_forest_model = RandomForestClassifier(random_state =42)
+random_forest_model.fit(X_train,y_train)
+
+predict_train_data = random_forest_model.predict(X_test)
+print(predict_train_data)
+acc = accuracy_score(y_test,predict_train_data)
+accuracy = acc*100
+print(str(accuracy)+"%")
+
+array=confusion_matrix(y_test, predict_train_data)
+print(array)
+
+df_cm = pd.DataFrame(array, range(2), range(2))
+sns.set(font_scale=2.4) # for label size
+sns.heatmap(df_cm, annot=True, annot_kws={"size": 16}) # font size
+plt.show()
+
+y_train_pred = cross_val_score(random_forest_model,X,y, cv=5)
+average=Average(y_train_pred)
+print(average)
+
+# KNN
+
+knn_model = KNeighborsClassifier(n_neighbors=3)
+knn_model.fit(X_train,y_train)
+
+predict_train_data = knn_model.predict(X_test)
+print(predict_train_data)
+acc = accuracy_score(y_test,predict_train_data)
+accuracy = acc*100
+print(str(accuracy)+"%")
+
+array=confusion_matrix(y_test, predict_train_data)
+print(array)
+
+df_cm = pd.DataFrame(array, range(2), range(2))
+sns.set(font_scale=2.4) # for label size
+sns.heatmap(df_cm, annot=True, annot_kws={"size": 16}) # font size
+plt.show()
+
+y_train_pred = cross_val_score(knn_model,X,y, cv=5)
+average=Average(y_train_pred)
+print(average)
+
+# Logistic regression
+
+logistic_reg_model = LogisticRegression(max_iter=1000)
+logistic_reg_model.fit(X_train,y_train)
+
+predict_train_data = logistic_reg_model.predict(X_test)
+print(predict_train_data)
+acc = accuracy_score(y_test,predict_train_data)
+accuracy = acc*100
+print(str(accuracy)+"%")
+
+array=confusion_matrix(y_test, predict_train_data)
+print(array)
+
+df_cm = pd.DataFrame(array, range(2), range(2))
+sns.set(font_scale=2.4) # for label size
+sns.heatmap(df_cm, annot=True, annot_kws={"size": 16}) # font size
+plt.show()
+
+y_train_pred = cross_val_score(logistic_reg_model,X,y, cv=5)
+average=Average(y_train_pred)
+print(average)
+
+# Suppor vector machine
+
+svm_model = svm.SVC(kernel='linear')
+svm_model.fit(X_train,y_train)
+
+predict_train_data = svm_model.predict(X_test)
+print(predict_train_data)
+acc = accuracy_score(y_test,predict_train_data)
+accuracy = acc*100
+print(str(accuracy)+"%")
+
+array=confusion_matrix(y_test, predict_train_data)
+print(array)
+
+df_cm = pd.DataFrame(array, range(2), range(2))
+sns.set(font_scale=2.4) # for label size
+sns.heatmap(df_cm, annot=True, annot_kws={"size": 16}) # font size
+plt.show()
+
+y_train_pred = cross_val_score(svm_model,X,y, cv=5)
+average=Average(y_train_pred)
+print(average)
+
+# Decision Tree
+
+clf = tree.DecisionTreeClassifier()
+clf.fit(X_train,y_train)
+
+predict_train_data=clf.predict(X_test)
+print(predict_train_data)
+acc=accuracy_score(y_test,predict_train_data)
+accuracy=acc*100
+print(str(accuracy)+"%")
+
+array=confusion_matrix(y_test, predict_train_data)
+print(array)
+
+df_cm = pd.DataFrame(array, range(2), range(2))
+sns.set(font_scale=2.4) # for label size
+sns.heatmap(df_cm, annot=True, annot_kws={"size": 16}) # font size
+plt.show()
+
+y_train_pred = cross_val_score(clf,X,y, cv=5)
+average=Average(y_train_pred)
+print(average)
